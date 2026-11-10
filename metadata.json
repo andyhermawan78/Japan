@@ -1,0 +1,6 @@
+{
+  "name": "Holiday Activity Quiz",
+  "description": "Interactive Japanese classroom game for SMART Boards and touchscreens on holiday activities (休みの活動).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

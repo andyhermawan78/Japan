@@ -1,0 +1,1571 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>休みの活動クイズ - Holiday Activity Quiz</title>
+  <style>
+    /* ==========================================================================
+       Classroom SMART Board Interactive Styles - Pure Inline CSS
+       ========================================================================== */
+    :root {
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --border-color: #e2e8f0;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --correct: #16a34a;
+      --correct-bg: #f0fdf4;
+      --correct-border: #86efac;
+      --wrong: #dc2626;
+      --wrong-bg: #fef2f2;
+      --wrong-border: #fca5a5;
+      --team-a: #dc2626;
+      --team-b: #2563eb;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      overflow-x: hidden;
+    }
+
+    /* 16:9 Screen Container Constraint */
+    .app-container {
+      width: 100%;
+      max-width: 1400px;
+      min-height: calc(100vh - 24px);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    /* Header Bar */
+    header {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-title h1 {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.02em;
+    }
+
+    .brand-title .badge {
+      background: #eff6ff;
+      color: #1e40af;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    /* Scoreboard */
+    .header-center {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .score-box {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .score-value {
+      font-family: monospace;
+      font-size: 32px;
+      color: var(--primary);
+    }
+
+    /* Team Mode Pill */
+    .team-scores {
+      display: none;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .team-badge {
+      padding: 6px 14px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 2px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .team-a {
+      background: #fef2f2;
+      color: var(--team-a);
+      border-color: #fca5a5;
+    }
+
+    .team-b {
+      background: #eff6ff;
+      color: var(--team-b);
+      border-color: #93c5fd;
+    }
+
+    .team-badge.active-turn {
+      transform: scale(1.08);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+    }
+
+    .team-a.active-turn {
+      box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.3);
+    }
+
+    /* Header Controls */
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn {
+      font-family: inherit;
+      font-size: 18px;
+      font-weight: 600;
+      padding: 10px 18px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      background: #ffffff;
+      color: var(--text-main);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.15s ease, transform 0.1s ease;
+      min-height: 48px;
+    }
+
+    .btn:active {
+      transform: translateY(2px);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    .btn-primary:active {
+      background: var(--primary-hover);
+    }
+
+    .btn-restart {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    /* Main Stage */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 16px;
+      position: relative;
+    }
+
+    /* Prompt Card */
+    .prompt-card {
+      background: #ffffff;
+      border: 2px solid var(--border-color);
+      border-radius: 24px;
+      padding: 24px 32px;
+      text-align: center;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .prompt-banner {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .prompt-icon {
+      font-size: 80px;
+      line-height: 1;
+      margin-bottom: 12px;
+      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.08));
+    }
+
+    .prompt-text {
+      font-size: clamp(32px, 4.5vw, 48px);
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.25;
+    }
+
+    .prompt-subtext {
+      font-size: 22px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    /* Timer Bar */
+    .timer-container {
+      width: 100%;
+      height: 8px;
+      background: #e2e8f0;
+      border-radius: 4px;
+      margin-top: 16px;
+      overflow: hidden;
+      display: none;
+    }
+
+    .timer-bar {
+      height: 100%;
+      width: 100%;
+      background: #2563eb;
+      transition: width 0.1s linear, background-color 0.3s ease;
+    }
+
+    /* 2x2 Grid of Big Answer Buttons */
+    .answers-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .answer-btn {
+      background: #ffffff;
+      border: 3px solid var(--border-color);
+      border-radius: 20px;
+      min-height: 110px;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+      transition: transform 0.12s ease, border-color 0.15s ease, background-color 0.15s ease;
+    }
+
+    .answer-btn:active {
+      transform: scale(0.98);
+    }
+
+    .key-indicator {
+      position: absolute;
+      top: 12px;
+      left: 14px;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: #f1f5f9;
+      color: #64748b;
+      font-weight: 700;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #e2e8f0;
+    }
+
+    .answer-japanese {
+      font-size: clamp(28px, 3.2vw, 40px);
+      font-weight: 700;
+      color: var(--text-main);
+      text-align: center;
+      line-height: 1.25;
+    }
+
+    .answer-reading {
+      font-size: clamp(18px, 2vw, 22px);
+      font-weight: 500;
+      color: #475569;
+      margin-top: 4px;
+      letter-spacing: 0.04em;
+    }
+
+    .answer-btn.hide-reading .answer-reading {
+      display: none;
+    }
+
+    /* States */
+    .answer-btn.correct {
+      background: var(--correct-bg) !important;
+      border-color: var(--correct) !important;
+      color: var(--correct) !important;
+      box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.25) !important;
+    }
+
+    .answer-btn.correct .answer-japanese {
+      color: #15803d !important;
+    }
+
+    .answer-btn.wrong {
+      background: var(--wrong-bg) !important;
+      border-color: var(--wrong) !important;
+      animation: shake 0.4s both;
+    }
+
+    .answer-btn.wrong .answer-japanese {
+      color: #b91c1c !important;
+    }
+
+    .answer-btn.disabled {
+      pointer-events: none;
+    }
+
+    /* Feedback Banner Area */
+    .feedback-container {
+      background: #ffffff;
+      border: 2px solid var(--border-color);
+      border-radius: 20px;
+      padding: 16px 24px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06);
+    }
+
+    .feedback-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .feedback-icon-badge {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: 900;
+      color: #ffffff;
+      flex-shrink: 0;
+    }
+
+    .feedback-correct .feedback-icon-badge {
+      background: var(--correct);
+    }
+
+    .feedback-wrong .feedback-icon-badge {
+      background: var(--wrong);
+    }
+
+    .feedback-text-group h3 {
+      font-size: 26px;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    .feedback-correct h3 {
+      color: #15803d;
+    }
+
+    .feedback-wrong h3 {
+      color: #b91c1c;
+    }
+
+    .feedback-detail {
+      font-size: 20px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .feedback-detail ruby {
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .btn-next {
+      font-size: 24px;
+      font-weight: 800;
+      padding: 14px 36px;
+      border-radius: 16px;
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 6px 14px rgba(37, 99, 235, 0.35);
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .btn-next:active {
+      transform: translateY(2px);
+      background: var(--primary-hover);
+    }
+
+    /* Footer & Controls */
+    footer {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .toggles-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .toggle-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 6px 10px;
+      border-radius: 8px;
+      background: #f8fafc;
+      border: 1px solid var(--border-color);
+    }
+
+    .toggle-label input {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    .footer-help {
+      font-size: 15px;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .kbd {
+      background: #e2e8f0;
+      border-radius: 6px;
+      padding: 2px 7px;
+      font-family: monospace;
+      font-size: 14px;
+      font-weight: 700;
+      color: #334155;
+    }
+
+    /* Results Screen */
+    .results-screen {
+      display: none;
+      background: #ffffff;
+      border: 2px solid var(--border-color);
+      border-radius: 24px;
+      padding: 36px 40px;
+      text-align: center;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .results-badge {
+      font-size: 72px;
+      margin-bottom: 8px;
+    }
+
+    .results-title {
+      font-size: 40px;
+      font-weight: 900;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+
+    .results-message {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 20px;
+    }
+
+    .results-score-highlight {
+      font-size: 64px;
+      font-weight: 900;
+      font-family: monospace;
+      color: var(--text-main);
+      background: #f1f5f9;
+      display: inline-block;
+      padding: 8px 36px;
+      border-radius: 20px;
+      border: 2px solid var(--border-color);
+      margin-bottom: 24px;
+    }
+
+    .results-actions {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 10px;
+    }
+
+    /* Vocabulary Sheet Modal */
+    .vocab-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+      max-height: 240px;
+      overflow-y: auto;
+      text-align: left;
+      margin: 20px 0;
+      padding: 8px;
+      background: #f8fafc;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    .vocab-item {
+      background: #ffffff;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 16px;
+    }
+
+    .vocab-item-icon {
+      font-size: 26px;
+      flex-shrink: 0;
+    }
+
+    .vocab-item-kanji {
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--text-main);
+    }
+
+    .vocab-item-kana {
+      font-size: 13px;
+      color: #64748b;
+    }
+
+    .vocab-item-en {
+      font-size: 13px;
+      color: #0284c7;
+      margin-left: auto;
+      text-align: right;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.6);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-box {
+      background: #ffffff;
+      border-radius: 24px;
+      max-width: 800px;
+      width: 100%;
+      padding: 28px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Animations */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-12px); }
+      40%, 80% { transform: translateX(12px); }
+    }
+
+    @keyframes confettiFall {
+      0% { transform: translateY(-30px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(105vh) rotate(720deg); opacity: 0; }
+    }
+
+    .confetti-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 99;
+      display: none;
+    }
+
+    .confetti-piece {
+      position: absolute;
+      top: -20px;
+      width: 14px;
+      height: 26px;
+      border-radius: 4px;
+      animation: confettiFall 3s linear infinite;
+    }
+
+    /* Responsive adjustments for 16:9 Widescreen Touchscreens */
+    @media (max-height: 800px) {
+      .prompt-icon { font-size: 60px; margin-bottom: 6px; }
+      .prompt-card { padding: 16px 24px; }
+      .answer-btn { min-height: 90px; padding: 12px 16px; }
+      .prompt-text { font-size: 34px; }
+      .answer-japanese { font-size: 28px; }
+      header { padding: 10px 18px; }
+      footer { padding: 8px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Confetti Layer -->
+  <div id="confetti-container" class="confetti-container"></div>
+
+  <div class="app-container">
+
+    <!-- Top Header Bar -->
+    <header>
+      <div class="brand-title">
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <h1>休みの活動クイズ</h1>
+            <span class="badge">JLPT N5</span>
+          </div>
+          <div style="font-size: 13px; color: #64748b; font-weight: 600; margin-top: 2px;">
+            Holiday Activity Quiz · Beginner Japanese
+          </div>
+        </div>
+      </div>
+
+      <div class="header-center">
+        <!-- Single / Class Mode Score -->
+        <div id="score-display-solo" class="score-box">
+          <span id="round-indicator">第 1 / 10 問 (Round 1/10)</span>
+          <span>·</span>
+          <span>正解 (Score): <span id="score-val" class="score-value">0</span></span>
+        </div>
+
+        <!-- Two-Team Mode Scoreboard -->
+        <div id="score-display-teams" class="team-scores">
+          <div id="team-a-badge" class="team-badge team-a active-turn">
+            <span>🔴 チームA (Team Red):</span>
+            <span id="team-a-score">0</span>
+          </div>
+          <div id="team-b-badge" class="team-badge team-b">
+            <span>🔵 チームB (Team Blue):</span>
+            <span id="team-b-score">0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button id="btn-vocab-modal" class="btn" title="単語一覧を表示 / Vocabulary List">📖 単語帳 (Vocab)</button>
+        <button id="btn-restart" class="btn btn-restart" title="最初からやり直す / Restart (Space)">🔄 もう一度 (Restart)</button>
+        <button id="btn-fullscreen" class="btn" title="全画面表示 / Fullscreen (F)">⛶ 全画面 (Screen)</button>
+      </div>
+    </header>
+
+    <!-- Main Game Area -->
+    <main id="main-stage">
+
+      <!-- Question Prompt Card -->
+      <div id="prompt-card" class="prompt-card">
+        <div id="prompt-banner" class="prompt-banner">英語に合う日本語をえらぼう！ / Match English to Japanese</div>
+        <div id="prompt-icon" class="prompt-icon">✈️</div>
+        <div id="prompt-text" class="prompt-text">to go on a trip</div>
+        <div id="prompt-subtext" class="prompt-subtext">どれが正しい？ (Which is correct?) · 第 1 問 / 全 10 問</div>
+
+        <!-- Optional Timer Bar -->
+        <div id="timer-container" class="timer-container">
+          <div id="timer-bar" class="timer-bar"></div>
+        </div>
+      </div>
+
+      <!-- 2x2 Answer Grid -->
+      <div id="answers-grid" class="answers-grid">
+        <button class="answer-btn" data-index="0" id="btn-choice-0">
+          <span class="key-indicator">1</span>
+          <span class="answer-japanese" id="choice-jp-0">旅行に行く</span>
+          <span class="answer-reading" id="choice-rd-0">りょこうにいく</span>
+        </button>
+
+        <button class="answer-btn" data-index="1" id="btn-choice-1">
+          <span class="key-indicator">2</span>
+          <span class="answer-japanese" id="choice-jp-1">海に行く</span>
+          <span class="answer-reading" id="choice-rd-1">うみにいく</span>
+        </button>
+
+        <button class="answer-btn" data-index="2" id="btn-choice-2">
+          <span class="key-indicator">3</span>
+          <span class="answer-japanese" id="choice-jp-2">山に登る</span>
+          <span class="answer-reading" id="choice-rd-2">やまにのぼる</span>
+        </button>
+
+        <button class="answer-btn" data-index="3" id="btn-choice-3">
+          <span class="key-indicator">4</span>
+          <span class="answer-japanese" id="choice-jp-3">写真を撮る</span>
+          <span class="answer-reading" id="choice-rd-3">しゃしんをとる</span>
+        </button>
+      </div>
+
+      <!-- Feedback Area -->
+      <div id="feedback-area" class="feedback-container">
+        <div class="feedback-left">
+          <div id="feedback-icon" class="feedback-icon-badge">✓</div>
+          <div class="feedback-text-group">
+            <h3 id="feedback-title">せいかい！ (Correct!)</h3>
+            <div id="feedback-desc" class="feedback-detail"></div>
+          </div>
+        </div>
+        <button id="btn-next" class="btn-next">つぎへ (Next) ➜</button>
+      </div>
+
+      <!-- Results Summary View (Hidden during quiz) -->
+      <div id="results-screen" class="results-screen">
+        <div id="results-badge" class="results-badge">💮</div>
+        <h2 id="results-title" class="results-title">ゲーム終了！おつかれさまでした！ (Game Over!)</h2>
+        <div id="results-message" class="results-message">たいへんよくできました！</div>
+        
+        <div class="results-score-highlight">
+          <span id="final-score-text">10 / 10</span>
+        </div>
+
+        <p style="font-size: 20px; color: #64748b; margin-bottom: 12px;">学習した休みの活動単語一覧 (Holiday Activities Review):</p>
+        <div id="results-vocab-summary" class="vocab-grid"></div>
+
+        <div class="results-actions">
+          <button id="btn-play-again" class="btn btn-primary" style="font-size: 24px; padding: 14px 40px;">🔄 もう一度あそぶ (Play Again)</button>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Bottom Settings & Classroom Toggles Bar -->
+    <footer>
+      <div class="toggles-group">
+        <!-- Furigana Reading Toggle -->
+        <label class="toggle-label" title="選択肢のひらがな読みを表示/非表示 · Toggle Furigana (R)">
+          <input type="checkbox" id="chk-readings" checked>
+          <span>ふりがな (Furigana)</span>
+        </label>
+
+        <!-- Two-Team Mode Toggle -->
+        <label class="toggle-label" title="赤組と青組の交互対戦モード · Two-Team Mode">
+          <input type="checkbox" id="chk-teams">
+          <span>👥 チーム対戦 (Team Mode)</span>
+        </label>
+
+        <!-- Sound FX Toggle -->
+        <label class="toggle-label" title="正解・不正解の効果音 · Sound FX (M)">
+          <input type="checkbox" id="chk-sound" checked>
+          <span>🔊 効果音 (Sound)</span>
+        </label>
+
+        <!-- Timer Toggle -->
+        <label class="toggle-label" title="1問あたりのカウントダウン · 15s Timer">
+          <input type="checkbox" id="chk-timer">
+          <span>⏱️ タイマー (15s Timer)</span>
+        </label>
+      </div>
+
+      <div class="footer-help">
+        <span>ショートカット (Keys):</span>
+        <span class="kbd">1</span>~<span class="kbd">4</span> Answer /
+        <span class="kbd">Space</span> Next /
+        <span class="kbd">R</span> Furigana /
+        <span class="kbd">F</span> Fullscreen
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Vocabulary Modal -->
+  <div id="vocab-modal" class="modal-backdrop">
+    <div class="modal-box" style="max-width: 860px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <h2 style="font-size: 24px; font-weight: 800; line-height: 1.2;">休みの活動 単語管理</h2>
+            <span id="vocab-count-badge" class="badge">全 12 語</span>
+          </div>
+          <div style="font-size: 13px; color: #64748b; font-weight: 600;">Holiday Activities Vocabulary List & Customizer</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button id="btn-toggle-add-form" class="btn btn-primary" style="font-size: 15px; padding: 8px 14px; min-height: 40px;">＋ 単語を追加 (Add Word)</button>
+          <button id="btn-reset-vocab" class="btn" style="font-size: 14px; padding: 8px 12px; min-height: 40px;" title="初期の12単語にリセット">初期化 (Reset)</button>
+          <button id="btn-close-modal" class="btn" style="padding: 6px 14px; font-size: 20px; min-height: 40px;">✕</button>
+        </div>
+      </div>
+
+      <!-- Add New Word Form (Collapsible) -->
+      <form id="form-add-vocab" style="display: none; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 16px; padding: 16px; margin-bottom: 16px;">
+        <div style="font-weight: 800; font-size: 18px; color: #1e3a8a; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+          <span>＋ 新しい単語の追加 · Add New Word</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 12px;">
+          <div>
+            <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 4px;">日本語 (Japanese) *</label>
+            <input type="text" id="input-new-kanji" placeholder="例: 本を読む / 散歩する" required style="width: 100%; padding: 8px 12px; font-size: 16px; font-weight: 700; border: 1px solid #cbd5e1; border-radius: 10px;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 4px;">よみ (Reading in Hiragana) *</label>
+            <input type="text" id="input-new-reading" placeholder="例: ほんをよむ / さんぽする" required style="width: 100%; padding: 8px 12px; font-size: 16px; border: 1px solid #cbd5e1; border-radius: 10px;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 4px;">英語の意味 (English Meaning) *</label>
+            <input type="text" id="input-new-english" placeholder="例: to read books" required style="width: 100%; padding: 8px 12px; font-size: 16px; border: 1px solid #cbd5e1; border-radius: 10px;">
+          </div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+            <label style="font-size: 13px; font-weight: 700; color: #334155;">アイコン (Icon / Emoji):</label>
+            <input type="text" id="input-new-icon" value="📚" style="width: 44px; text-align: center; font-size: 20px; padding: 4px; border: 1px solid #cbd5e1; border-radius: 8px;">
+            <span style="font-size: 12px; color: #64748b;">パレットからワンタップで選択:</span>
+          </div>
+          <div id="emoji-palette" style="display: flex; gap: 6px; flex-wrap: wrap;"></div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 8px;">
+          <button type="button" id="btn-cancel-add-vocab" class="btn" style="font-size: 15px; padding: 8px 16px;">キャンセル (Cancel)</button>
+          <button type="submit" class="btn btn-primary" style="font-size: 15px; padding: 8px 20px; background: #16a34a; border-color: #16a34a;">✓ クイズに追加する (Add to Quiz)</button>
+        </div>
+      </form>
+
+      <div id="modal-vocab-list" class="vocab-grid" style="max-height: 380px;"></div>
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; flex-wrap: wrap; gap: 10px;">
+        <span style="font-size: 12px; color: #64748b;">💡 追加・削除した単語は自動保存され、次回のプレイにも反映されます。</span>
+        <button id="btn-close-modal-bottom" class="btn btn-primary">閉じる / Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       Pure Vanilla JavaScript Game Engine - Zero External Dependencies
+       ========================================================================== -->
+  <script>
+    // Initial Default 12 Holiday Activities Data (休みの活動)
+    const DEFAULT_VOCABULARY = [
+      { id: 1,  kanji: "旅行に行く", reading: "りょこうにいく", english: "to go on a trip", icon: "✈️", furiganaHtml: "<ruby>旅行<rt>りょこう</rt></ruby>に<ruby>行<rt>い</rt></ruby>く" },
+      { id: 2,  kanji: "海に行く",   reading: "うみにいく",     english: "to go to the beach", icon: "🏖️", furiganaHtml: "<ruby>海<rt>うみ</rt></ruby>に<ruby>行<rt>い</rt></ruby>く" },
+      { id: 3,  kanji: "山に登る",   reading: "やまにのぼる",   english: "to climb a mountain", icon: "⛰️", furiganaHtml: "<ruby>山<rt>やま</rt></ruby>に<ruby>登<rt>のぼ</rt></ruby>る" },
+      { id: 4,  kanji: "写真を撮る", reading: "しゃしんをとる", english: "to take photos",     icon: "📷", furiganaHtml: "<ruby>写真<rt>しゃしん</rt></ruby>を<ruby>撮<rt>と</rt></ruby>る" },
+      { id: 5,  kanji: "友達に会う", reading: "ともだちにあう", english: "to meet friends",    icon: "👥", furiganaHtml: "<ruby>友達<rt>ともだち</rt></ruby>に<ruby>会<rt>あ</rt></ruby>う" },
+      { id: 6,  kanji: "映画を見る", reading: "えいがをみる",   english: "to watch a movie",   icon: "🎬", furiganaHtml: "<ruby>映画<rt>えいが</rt></ruby>を<ruby>見<rt>み</rt></ruby>る" },
+      { id: 7,  kanji: "買い物をする", reading: "かいものをする", english: "to go shopping",  icon: "🛍️", furiganaHtml: "<ruby>買<rt>か</rt></ruby>い<ruby>物<rt>もの</rt></ruby>をする" },
+      { id: 8,  kanji: "温泉に入る", reading: "おんせんにはいる", english: "to go to a hot spring", icon: "♨️", furiganaHtml: "<ruby>温泉<rt>おんせん</rt></ruby>に<ruby>入<rt>はい</rt></ruby>る" },
+      { id: 9,  kanji: "お祭りに行く", reading: "おまつりにいく", english: "to go to a festival", icon: "🏮", furiganaHtml: "お<ruby>祭<rt>まつ</rt></ruby>りに<ruby>行<rt>い</rt></ruby>く" },
+      { id: 10, kanji: "料理を作る", reading: "りょうりをつくる", english: "to cook",           icon: "🍳", furiganaHtml: "<ruby>料理<rt>りょうり</rt></ruby>を<ruby>作<rt>つく</rt></ruby>る" },
+      { id: 11, kanji: "ゲームをする", reading: "ゲームをする",   english: "to play games",      icon: "🎮", furiganaHtml: "ゲームをする" },
+      { id: 12, kanji: "家族と過ごす", reading: "かぞくとすごす", english: "to spend time with family", icon: "👨‍👩‍👧", furiganaHtml: "<ruby>家族<rt>かぞく</rt></ruby>と<ruby>過<rt>す</rt></ruby>ごす" }
+    ];
+
+    const STORAGE_KEY = 'yasumi_quiz_vocab_storage';
+    let VOCABULARY = [...DEFAULT_VOCABULARY];
+
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length >= 4) {
+          VOCABULARY = parsed;
+        }
+      }
+    } catch (e) {}
+
+    const PRESET_EMOJIS = ['📚', '🏊', '🚴', '🎨', '🎵', '⚽', '🏕️', '🍣', '🍰', '🐶', '💤', '🛒', '🛹', '🎤', '☕', '🏃'];
+
+    const TOTAL_ROUNDS = 10;
+    const TIMER_SECONDS = 15;
+
+    // Game State
+    let currentRound = 0;
+    let score = 0;
+    let teamAScore = 0;
+    let teamBScore = 0;
+    let currentTeam = 'A'; // 'A' or 'B'
+    let isTeamMode = false;
+    let showReadings = true;
+    let soundEnabled = true;
+    let timerEnabled = false;
+
+    let roundQuestions = [];
+    let currentQuestion = null;
+    let currentChoices = [];
+    let isAnswered = false;
+    let timerInterval = null;
+    let timerRemaining = TIMER_SECONDS;
+
+    // Web Audio API Synthesizer
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+          audioCtx = new AudioContextClass();
+        }
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playSound(type) {
+      if (!soundEnabled) return;
+      initAudio();
+      if (!audioCtx) return;
+
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      if (type === 'correct') {
+        // High bright two-tone chime (523Hz -> 784Hz)
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, now); // C5
+        osc.frequency.setValueAtTime(783.99, now + 0.12); // G5
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+        osc.start(now);
+        osc.stop(now + 0.5);
+      } else if (type === 'wrong') {
+        // Low warm buzz (220Hz -> 180Hz)
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.setValueAtTime(174.61, now + 0.15);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+        osc.start(now);
+        osc.stop(now + 0.45);
+      } else if (type === 'victory') {
+        // Fanfare chord arpeggio
+        [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+          const noteOsc = audioCtx.createOscillator();
+          const noteGain = audioCtx.createGain();
+          noteOsc.connect(noteGain);
+          noteGain.connect(audioCtx.destination);
+          noteOsc.type = 'sine';
+          noteOsc.frequency.setValueAtTime(freq, now + i * 0.12);
+          noteGain.gain.setValueAtTime(0.18, now + i * 0.12);
+          noteGain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.6);
+          noteOsc.start(now + i * 0.12);
+          noteOsc.stop(now + i * 0.12 + 0.6);
+        });
+      }
+    }
+
+    // Helper: Shuffle Array
+    function shuffle(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    // Initialize Questions for 10 Rounds
+    function setupGame() {
+      currentRound = 0;
+      score = 0;
+      teamAScore = 0;
+      teamBScore = 0;
+      currentTeam = 'A';
+      isAnswered = false;
+
+      // Select 10 questions (or shuffled items)
+      roundQuestions = shuffle(VOCABULARY).slice(0, TOTAL_ROUNDS);
+      if (roundQuestions.length < TOTAL_ROUNDS) {
+        // Fill up to 10 if needed
+        while (roundQuestions.length < TOTAL_ROUNDS) {
+          roundQuestions.push(VOCABULARY[Math.floor(Math.random() * VOCABULARY.length)]);
+        }
+      }
+
+      // Hide results, show quiz stage
+      document.getElementById('results-screen').style.display = 'none';
+      document.getElementById('prompt-card').style.display = 'flex';
+      document.getElementById('answers-grid').style.display = 'grid';
+      document.getElementById('feedback-area').style.display = 'none';
+      hideConfetti();
+
+      updateScoreUI();
+      loadNextQuestion();
+    }
+
+    // Load Round Question
+    function loadNextQuestion() {
+      if (currentRound >= TOTAL_ROUNDS) {
+        showResults();
+        return;
+      }
+
+      isAnswered = false;
+      currentQuestion = roundQuestions[currentRound];
+
+      // Prepare 4 choices: 1 correct + 3 random distractors
+      const distractors = shuffle(VOCABULARY.filter(v => v.id !== currentQuestion.id)).slice(0, 3);
+      currentChoices = shuffle([currentQuestion, ...distractors]);
+
+      // Update UI Prompts
+      document.getElementById('prompt-icon').textContent = currentQuestion.icon;
+      document.getElementById('prompt-text').textContent = currentQuestion.english;
+      
+      if (isTeamMode) {
+        const teamName = currentTeam === 'A' ? '🔴 チームA (赤組)' : '🔵 チームB (青組)';
+        document.getElementById('prompt-banner').textContent = `${teamName} の番！ 英語に合う日本語をえらぼう`;
+      } else {
+        document.getElementById('prompt-banner').textContent = '英語に合う日本語をえらぼう！';
+      }
+      document.getElementById('prompt-subtext').textContent = `第 ${currentRound + 1} 問 / 全 ${TOTAL_ROUNDS} 問`;
+
+      // Render 4 answer buttons
+      currentChoices.forEach((choice, idx) => {
+        const btn = document.getElementById(`btn-choice-${idx}`);
+        const jpSpan = document.getElementById(`choice-jp-${idx}`);
+        const rdSpan = document.getElementById(`choice-rd-${idx}`);
+
+        jpSpan.textContent = choice.kanji;
+        rdSpan.textContent = choice.reading;
+
+        btn.className = `answer-btn ${showReadings ? '' : 'hide-reading'}`;
+      });
+
+      // Reset feedback
+      document.getElementById('feedback-area').style.display = 'none';
+
+      // Update Header info
+      document.getElementById('round-indicator').textContent = `第 ${currentRound + 1} / ${TOTAL_ROUNDS} 問`;
+
+      // Start Timer if enabled
+      startTimer();
+    }
+
+    // Answer Selection
+    function handleChoice(index) {
+      if (isAnswered) return;
+      isAnswered = true;
+      stopTimer();
+
+      const selectedChoice = currentChoices[index];
+      const isCorrect = selectedChoice.id === currentQuestion.id;
+      const selectedBtn = document.getElementById(`btn-choice-${index}`);
+
+      // Disable all buttons
+      currentChoices.forEach((_, idx) => {
+        document.getElementById(`btn-choice-${idx}`).classList.add('disabled');
+      });
+
+      const feedbackArea = document.getElementById('feedback-area');
+      const feedbackTitle = document.getElementById('feedback-title');
+      const feedbackIcon = document.getElementById('feedback-icon');
+      const feedbackDesc = document.getElementById('feedback-desc');
+
+      feedbackArea.style.display = 'flex';
+
+      if (isCorrect) {
+        selectedBtn.classList.add('correct');
+        feedbackArea.className = 'feedback-container feedback-correct';
+        feedbackTitle.textContent = 'せいかい！ (Correct!)';
+        feedbackIcon.textContent = '✓';
+        playSound('correct');
+
+        // Score update
+        score++;
+        if (isTeamMode) {
+          if (currentTeam === 'A') teamAScore++;
+          else teamBScore++;
+        }
+      } else {
+        selectedBtn.classList.add('wrong');
+        feedbackArea.className = 'feedback-container feedback-wrong';
+        feedbackTitle.textContent = 'ざんねん… (Too bad…)';
+        feedbackIcon.textContent = '✗';
+        playSound('wrong');
+
+        // Highlight correct button
+        currentChoices.forEach((choice, idx) => {
+          if (choice.id === currentQuestion.id) {
+            document.getElementById(`btn-choice-${idx}`).classList.add('correct');
+          }
+        });
+      }
+
+      feedbackDesc.innerHTML = `正解: ${currentQuestion.furiganaHtml} 【${currentQuestion.english}】`;
+      updateScoreUI();
+    }
+
+    function advanceToNext() {
+      currentRound++;
+      if (isTeamMode) {
+        currentTeam = currentTeam === 'A' ? 'B' : 'A';
+      }
+      loadNextQuestion();
+    }
+
+    function updateScoreUI() {
+      document.getElementById('score-val').textContent = score;
+      document.getElementById('team-a-score').textContent = teamAScore;
+      document.getElementById('team-b-score').textContent = teamBScore;
+
+      const teamABadge = document.getElementById('team-a-badge');
+      const teamBBadge = document.getElementById('team-b-badge');
+      if (currentTeam === 'A') {
+        teamABadge.classList.add('active-turn');
+        teamBBadge.classList.remove('active-turn');
+      } else {
+        teamBBadge.classList.add('active-turn');
+        teamABadge.classList.remove('active-turn');
+      }
+    }
+
+    // Results Display
+    function showResults() {
+      stopTimer();
+      document.getElementById('prompt-card').style.display = 'none';
+      document.getElementById('answers-grid').style.display = 'none';
+      document.getElementById('feedback-area').style.display = 'none';
+
+      const resultsScreen = document.getElementById('results-screen');
+      resultsScreen.style.display = 'block';
+
+      const badge = document.getElementById('results-badge');
+      const title = document.getElementById('results-title');
+      const msg = document.getElementById('results-message');
+      const scoreTxt = document.getElementById('final-score-text');
+
+      if (isTeamMode) {
+        if (teamAScore > teamBScore) {
+          badge.textContent = '🏆';
+          title.textContent = 'チームA (赤組) の勝利！';
+          msg.textContent = 'おめでとうございます！ すばらしいチームワーク！';
+        } else if (teamBScore > teamAScore) {
+          badge.textContent = '🏆';
+          title.textContent = 'チームB (青組) の勝利！';
+          msg.textContent = 'おめでとうございます！ すばらしいチームワーク！';
+        } else {
+          badge.textContent = '🤝';
+          title.textContent = 'ひきわけ (Tie Game)！';
+          msg.textContent = '両チームともよく頑張りました！';
+        }
+        scoreTxt.textContent = `赤組 ${teamAScore} - ${teamBScore} 青組`;
+      } else {
+        scoreTxt.textContent = `${score} / ${TOTAL_ROUNDS} 点`;
+        if (score === 10) {
+          badge.textContent = '💮';
+          title.textContent = 'パーフェクト達成！';
+          msg.textContent = 'たいへんよくできました！ 完璧です！';
+        } else if (score >= 8) {
+          badge.textContent = '🌸';
+          title.textContent = 'すばらしいスコア！';
+          msg.textContent = 'よくできました！ 休みの表現はバッチリです！';
+        } else if (score >= 6) {
+          badge.textContent = '👍';
+          title.textContent = 'よくがんばりました！';
+          msg.textContent = 'もう少しでマスター！ もう一度復習しよう！';
+        } else {
+          badge.textContent = '💪';
+          title.textContent = 'ナイスチャレンジ！';
+          msg.textContent = 'もう一度練習して満点をめざそう！';
+        }
+      }
+
+      // Populate Vocabulary Review in Results
+      const summaryContainer = document.getElementById('results-vocab-summary');
+      summaryContainer.innerHTML = '';
+      VOCABULARY.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'vocab-item';
+        div.innerHTML = `
+          <span class="vocab-item-icon">${item.icon}</span>
+          <div>
+            <div class="vocab-item-kanji">${item.kanji}</div>
+            <div class="vocab-item-kana">${item.reading}</div>
+          </div>
+          <div class="vocab-item-en">${item.english}</div>
+        `;
+        summaryContainer.appendChild(div);
+      });
+
+      playSound('victory');
+      launchConfetti();
+    }
+
+    // Confetti Animation
+    function launchConfetti() {
+      const container = document.getElementById('confetti-container');
+      container.innerHTML = '';
+      container.style.display = 'block';
+
+      const colors = ['#f43f5e', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
+      for (let i = 0; i < 50; i++) {
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        piece.style.left = `${Math.random() * 100}vw`;
+        piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.animationDelay = `${Math.random() * 2}s`;
+        piece.style.animationDuration = `${2.5 + Math.random() * 2}s`;
+        container.appendChild(piece);
+      }
+    }
+
+    function hideConfetti() {
+      const container = document.getElementById('confetti-container');
+      container.style.display = 'none';
+      container.innerHTML = '';
+    }
+
+    // Timer Logic
+    function startTimer() {
+      stopTimer();
+      const container = document.getElementById('timer-container');
+      const bar = document.getElementById('timer-bar');
+
+      if (!timerEnabled) {
+        container.style.display = 'none';
+        return;
+      }
+
+      container.style.display = 'block';
+      timerRemaining = TIMER_SECONDS;
+      bar.style.width = '100%';
+      bar.style.backgroundColor = '#2563eb';
+
+      const stepMs = 100;
+      const totalSteps = (TIMER_SECONDS * 1000) / stepMs;
+      let currentStep = 0;
+
+      timerInterval = setInterval(() => {
+        currentStep++;
+        const pct = Math.max(0, 100 - (currentStep / totalSteps) * 100);
+        bar.style.width = `${pct}%`;
+
+        if (pct < 30) {
+          bar.style.backgroundColor = '#dc2626';
+        } else if (pct < 60) {
+          bar.style.backgroundColor = '#f59e0b';
+        }
+
+        if (currentStep >= totalSteps) {
+          stopTimer();
+          // Timeout counts as wrong answer
+          handleChoice(-1);
+        }
+      }, stepMs);
+    }
+
+    function stopTimer() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+    }
+
+    // Save vocabulary list to LocalStorage
+    function saveVocabToStorage() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(VOCABULARY));
+      } catch (e) {}
+    }
+
+    // Vocabulary Modal Setup & Render
+    function setupVocabModal() {
+      const list = document.getElementById('modal-vocab-list');
+      const badge = document.getElementById('vocab-count-badge');
+      if (badge) badge.textContent = `全 ${VOCABULARY.length} 語 (${VOCABULARY.length} Items)`;
+
+      list.innerHTML = '';
+      VOCABULARY.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'vocab-item';
+        div.style.position = 'relative';
+        div.innerHTML = `
+          <span class="vocab-item-icon">${item.icon}</span>
+          <div style="flex: 1; min-width: 0;">
+            <div class="vocab-item-kanji" style="display: flex; align-items: center; gap: 6px;">
+              <span>${item.furiganaHtml || item.kanji}</span>
+              ${item.isCustom ? '<span style="font-size: 10px; background: #dbeafe; color: #1d4ed8; padding: 2px 6px; border-radius: 4px; font-weight: 700;">カスタム</span>' : ''}
+            </div>
+            <div class="vocab-item-kana">${item.reading}</div>
+            <div class="vocab-item-en" style="margin-left: 0; text-align: left; margin-top: 2px;">${item.english}</div>
+          </div>
+          <button class="btn btn-delete-vocab" data-id="${item.id}" title="「${item.kanji}」を削除" style="background: transparent; border: none; font-size: 18px; color: #94a3b8; cursor: pointer; padding: 6px; border-radius: 8px;">🗑️</button>
+        `;
+        list.appendChild(div);
+      });
+
+      // Bind delete buttons
+      document.querySelectorAll('.btn-delete-vocab').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const id = Number(btn.getAttribute('data-id'));
+          if (VOCABULARY.length <= 4) {
+            alert('クイズには最低4つの単語が必要です (At least 4 words are required).');
+            return;
+          }
+          VOCABULARY = VOCABULARY.filter(v => v.id !== id);
+          saveVocabToStorage();
+          setupVocabModal();
+          setupGame();
+        });
+      });
+    }
+
+    // Populate Preset Emoji Palette
+    function setupEmojiPalette() {
+      const palette = document.getElementById('emoji-palette');
+      if (!palette) return;
+      palette.innerHTML = '';
+      const inputIcon = document.getElementById('input-new-icon');
+
+      PRESET_EMOJIS.forEach(emoji => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = emoji;
+        btn.style.cssText = 'background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 4px 8px; font-size: 18px; cursor: pointer;';
+        btn.addEventListener('click', () => {
+          inputIcon.value = emoji;
+        });
+        palette.appendChild(btn);
+      });
+    }
+
+    // Event Listeners Initialization
+    window.addEventListener('DOMContentLoaded', () => {
+      setupEmojiPalette();
+      setupVocabModal();
+
+      // Toggle Add Word Form
+      const btnToggleAdd = document.getElementById('btn-toggle-add-form');
+      const formAdd = document.getElementById('form-add-vocab');
+      btnToggleAdd.addEventListener('click', () => {
+        formAdd.style.display = formAdd.style.display === 'none' ? 'block' : 'none';
+      });
+
+      document.getElementById('btn-cancel-add-vocab').addEventListener('click', () => {
+        formAdd.style.display = 'none';
+      });
+
+      // Add Word Form Submission
+      formAdd.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const kanji = document.getElementById('input-new-kanji').value.trim();
+        const reading = document.getElementById('input-new-reading').value.trim();
+        const english = document.getElementById('input-new-english').value.trim();
+        const icon = document.getElementById('input-new-icon').value.trim() || '📝';
+
+        if (!kanji || !reading || !english) return;
+
+        const newItem = {
+          id: Date.now(),
+          kanji: kanji,
+          reading: reading,
+          english: english,
+          icon: icon,
+          isCustom: true,
+          furiganaHtml: kanji === reading ? kanji : `<ruby>${kanji}<rt>${reading}</rt></ruby>`
+        };
+
+        VOCABULARY.unshift(newItem);
+        saveVocabToStorage();
+
+        // Reset form
+        document.getElementById('input-new-kanji').value = '';
+        document.getElementById('input-new-reading').value = '';
+        document.getElementById('input-new-english').value = '';
+        document.getElementById('input-new-icon').value = '📚';
+        formAdd.style.display = 'none';
+
+        setupVocabModal();
+        setupGame();
+      });
+
+      // Reset to Default Vocabulary
+      document.getElementById('btn-reset-vocab').addEventListener('click', () => {
+        if (confirm('初期の12単語にリセットしますか？ (Reset to original 12 vocabulary items?)')) {
+          VOCABULARY = [...DEFAULT_VOCABULARY];
+          saveVocabToStorage();
+          setupVocabModal();
+          setupGame();
+        }
+      });
+
+      // Answer Buttons Click
+      for (let i = 0; i < 4; i++) {
+        const btn = document.getElementById(`btn-choice-${i}`);
+        btn.addEventListener('click', () => handleChoice(i));
+      }
+
+      // Next & Restart Buttons
+      document.getElementById('btn-next').addEventListener('click', advanceToNext);
+      document.getElementById('btn-restart').addEventListener('click', setupGame);
+      document.getElementById('btn-play-again').addEventListener('click', setupGame);
+
+      // Furigana Reading Toggle
+      const chkReadings = document.getElementById('chk-readings');
+      chkReadings.addEventListener('change', (e) => {
+        showReadings = e.target.checked;
+        for (let i = 0; i < 4; i++) {
+          const btn = document.getElementById(`btn-choice-${i}`);
+          if (showReadings) {
+            btn.classList.remove('hide-reading');
+          } else {
+            btn.classList.add('hide-reading');
+          }
+        }
+      });
+
+      // Two-Team Mode Toggle
+      const chkTeams = document.getElementById('chk-teams');
+      chkTeams.addEventListener('change', (e) => {
+        isTeamMode = e.target.checked;
+        const soloBox = document.getElementById('score-display-solo');
+        const teamBox = document.getElementById('score-display-teams');
+        if (isTeamMode) {
+          soloBox.style.display = 'none';
+          teamBox.style.display = 'flex';
+        } else {
+          soloBox.style.display = 'flex';
+          teamBox.style.display = 'none';
+        }
+        setupGame();
+      });
+
+      // Sound FX Toggle
+      const chkSound = document.getElementById('chk-sound');
+      chkSound.addEventListener('change', (e) => {
+        soundEnabled = e.target.checked;
+        if (soundEnabled) initAudio();
+      });
+
+      // Timer Toggle
+      const chkTimer = document.getElementById('chk-timer');
+      chkTimer.addEventListener('change', (e) => {
+        timerEnabled = e.target.checked;
+        if (!isAnswered) startTimer();
+      });
+
+      // Fullscreen Toggle
+      document.getElementById('btn-fullscreen').addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      });
+
+      // Modal Toggles
+      const modal = document.getElementById('vocab-modal');
+      document.getElementById('btn-vocab-modal').addEventListener('click', () => {
+        modal.style.display = 'flex';
+      });
+      document.getElementById('btn-close-modal').addEventListener('click', () => {
+        modal.style.display = 'none';
+      });
+      document.getElementById('btn-close-modal-bottom').addEventListener('click', () => {
+        modal.style.display = 'none';
+      });
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.style.display = 'none';
+      });
+
+      // Keyboard Controls (1-4, Space, Enter, R, M, F)
+      window.addEventListener('keydown', (e) => {
+        // Prevent default space scroll
+        if (e.code === 'Space') e.preventDefault();
+
+        if (e.key === '1') handleChoice(0);
+        else if (e.key === '2') handleChoice(1);
+        else if (e.key === '3') handleChoice(2);
+        else if (e.key === '4') handleChoice(3);
+        else if (e.code === 'Space' || e.key === 'Enter') {
+          if (isAnswered) {
+            advanceToNext();
+          } else if (document.getElementById('results-screen').style.display === 'block') {
+            setupGame();
+          }
+        } else if (e.key === 'r' || e.key === 'R') {
+          chkReadings.checked = !chkReadings.checked;
+          chkReadings.dispatchEvent(new Event('change'));
+        } else if (e.key === 'm' || e.key === 'M') {
+          chkSound.checked = !chkSound.checked;
+          chkSound.dispatchEvent(new Event('change'));
+        } else if (e.key === 'f' || e.key === 'F') {
+          document.getElementById('btn-fullscreen').click();
+        }
+      });
+
+      // Start first game
+      setupGame();
+    });
+  </script>
+</body>
+</html>
